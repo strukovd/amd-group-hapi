@@ -1,11 +1,15 @@
 import * as Hapi from '@hapi/hapi';
 import { Request, ResponseToolkit } from 'hapi';
+import * as dotenv from "dotenv";
 
 class Main {
 	static async initServer() {
+		dotenv.config({});
+		Main.checkRequiredEnv([`HOST`, `PORT`]);
+
 		const server: Hapi.Server = Hapi.server({
-			host: `localhost`,
-			port: 5555
+			host: process.env.HOST,
+			port: process.env.PORT
 	   	});
 
 		server.route({
@@ -17,7 +21,18 @@ class Main {
 		});
 
 		await server.start();
-		console.log(`Server started at localhost:5555`);
+		console.log(`Сервер запущен на ${process.env.HOST}:${process.env.PORT}`);
+	}
+
+	static checkRequiredEnv(requiredFields: Array<string>) {
+		const existFields: Array<string> = Object.keys(process.env);
+		requiredFields.forEach(
+			(reqFieldName: string) => {
+				if( !existFields.includes(reqFieldName) ) {
+					throw new Error(`Отсутствует обязательная переменная среды ${reqFieldName}`);
+				}
+			}
+		);
 	}
 }
 
